@@ -3892,11 +3892,18 @@ RT 01/RW 01, Babakan Ciparay, Bandung">
 																			<div id="saic-comment-status-6854"
 																				class="saic-comment-status"></div>
 
+																			<!-- Toggle Wishes Button -->
+																			<div style="text-align: center; margin: 15px 0;">
+																				<button type="button" id="toggleWishesBtn" style="background-color: transparent; color: #7A4E7A; border: 2px solid #7A4E7A; padding: 8px 22px; border-radius: 20px; font-family: 'invitajafont', sans-serif; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; outline: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+																					Tampilkan Ucapan
+																				</button>
+																			</div>
+
 																			<ul id="saic-container-comment-6854"
 																				class="saic-container-comments saic-order-DESC saic-has-36-comments saic-multiple-comments"
-																				data-order="DESC"></ul>
+																				data-order="DESC" style="display: none;"></ul>
 
-																			<div class="saic-holder-6854 saic-holder">
+																			<div class="saic-holder-6854 saic-holder" style="display: none;">
 																			</div>
 
 																		</div>
@@ -5250,6 +5257,7 @@ RT 01/RW 01, Babakan Ciparay, Bandung">
 		var currentPage = 1;
 		var commentsPerPage = 5;
 		var currentPostId = "6854";
+		var isWishesVisible = false;
 
 		// Override getComments_SAIC to load comments from Google Sheets Web App
 		function getComments_SAIC(post_id, num_comments, num_get_comments, order_comments) {
@@ -5447,7 +5455,7 @@ RT 01/RW 01, Babakan Ciparay, Bandung">
 					'</li>';
 			});
 
-			$container_comments.html(html).show();
+			$container_comments.html(html);
 
 			// Render custom pagination next / prev buttons
 			if (totalPages > 1) {
@@ -5456,7 +5464,7 @@ RT 01/RW 01, Babakan Ciparay, Bandung">
 					'  <span style="font-size:13px; color:#555;">Halaman ' + currentPage + ' dari ' + totalPages + '</span>' +
 					'  <button id="nextPageBtn" style="background:#7A4E7A; color:white; border:none; padding: 6px 12px; border-radius: 4px; cursor:pointer; font-size:12px;' + (currentPage === totalPages ? 'opacity:0.5; cursor:default;' : '') + '" ' + (currentPage === totalPages ? 'disabled' : '') + '>Selanjutnya</button>' +
 					'</div>';
-				$holder.html(paginationHtml).show();
+				$holder.html(paginationHtml);
 
 				jQuery("#prevPageBtn").click(function () {
 					if (currentPage > 1) {
@@ -5474,7 +5482,20 @@ RT 01/RW 01, Babakan Ciparay, Bandung">
 					}
 				});
 			} else {
-				$holder.html("").hide();
+				$holder.html("");
+			}
+
+			// Apply visibility state
+			if (isWishesVisible) {
+				$container_comments.show();
+				if (totalPages > 1) {
+					$holder.show();
+				} else {
+					$holder.hide();
+				}
+			} else {
+				$container_comments.hide();
+				$holder.hide();
 			}
 		}
 
@@ -5513,6 +5534,11 @@ RT 01/RW 01, Babakan Ciparay, Bandung">
 				};
 				allComments.unshift(localNew);
 				currentPage = 1;
+				isWishesVisible = true;
+				jQuery("#toggleWishesBtn").text("Sembunyikan Ucapan").css({
+					"background-color": "#7A4E7A",
+					"color": "white"
+				});
 				renderComments(post_id);
 
 				// Reset form fields
@@ -5555,6 +5581,11 @@ RT 01/RW 01, Babakan Ciparay, Bandung">
 						newComment.timestamp = new Date().toISOString();
 						allComments.unshift(newComment);
 						currentPage = 1;
+						isWishesVisible = true;
+						jQuery("#toggleWishesBtn").text("Sembunyikan Ucapan").css({
+							"background-color": "#7A4E7A",
+							"color": "white"
+						});
 						renderComments(post_id);
 
 						comment_form.find("input[name='author']").val("");
@@ -5628,6 +5659,52 @@ RT 01/RW 01, Babakan Ciparay, Bandung">
 				}
 			}
 		});
+
+		// Handle wishes toggle visibility
+		jQuery(document).on("click", "#toggleWishesBtn", function() {
+			var wishesList = jQuery("ul#saic-container-comment-6854");
+			var pagination = jQuery("div.saic-holder-6854");
+			
+			if (isWishesVisible) {
+				isWishesVisible = false;
+				wishesList.slideUp(300);
+				pagination.fadeOut(200);
+				jQuery(this).text("Tampilkan Ucapan").css({
+					"background-color": "transparent",
+					"color": "#7A4E7A"
+				});
+			} else {
+				isWishesVisible = true;
+				wishesList.slideDown(300);
+				if (Math.ceil(allComments.length / commentsPerPage) > 1) {
+					pagination.fadeIn(300);
+				}
+				jQuery(this).text("Sembunyikan Ucapan").css({
+					"background-color": "#7A4E7A",
+					"color": "white"
+				});
+			}
+		});
+
+		// Hover effect for toggle button
+		jQuery(document).on({
+			mouseenter: function() {
+				if (!isWishesVisible) {
+					jQuery(this).css({
+						"background-color": "#7A4E7A",
+						"color": "white"
+					});
+				}
+			},
+			mouseleave: function() {
+				if (!isWishesVisible) {
+					jQuery(this).css({
+						"background-color": "transparent",
+						"color": "#7A4E7A"
+					});
+				}
+			}
+		}, "#toggleWishesBtn");
 	</script>
 	<script id="dce-fix-background-loop-js"
 		src="wp-content/plugins/dynamic-content-for-elementor-new-version/assets/js/fix-background-loop.min.js?ver=3.4.0"></script>
